@@ -4,12 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import random.org.Random;
 import random.org.RandomRequest;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 
 public class RandomWrapper {
 
@@ -34,31 +32,18 @@ public class RandomWrapper {
         Random randomPOJO = null;
         try {
             RandomRequest randomRequest = new RandomRequest(n, min, max, API_KEY);
-            ObjectMapper objectMapper = new ObjectMapper();
-            java.net.URL url = new URL(URL);
 
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("POST");
-            con.setRequestProperty("Content-Type", "application/json");
-            con.setDoOutput(true);
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(URL))
+                    .POST(HttpRequest.BodyPublishers.ofString(randomRequest.toString()))
+                    .header("Content-Type", "application/json")
+                    .build();
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            try (OutputStream os = con.getOutputStream()) {
-                byte[] input = randomRequest.toString().getBytes(StandardCharsets.UTF_8);
-                os.write(input, 0, input.length);
-            }
-            StringBuilder response = new StringBuilder();
+            if (debugging) System.out.println(response.body());
 
-            try (BufferedReader br = new BufferedReader(
-                    new InputStreamReader(con.getInputStream(), StandardCharsets.UTF_8))) {
-                String responseLine;
-                while ((responseLine = br.readLine()) != null) {
-                    response.append(responseLine.trim());
-                }
-                if (debugging) {
-                    System.out.println(response);
-                }
-            }
-            randomPOJO = objectMapper.readValue(response.toString(), Random.class);
+            randomPOJO = new ObjectMapper().readValue(response.body(), Random.class);
         } catch (Exception e) {
             e.printStackTrace();
         }
