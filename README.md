@@ -2,6 +2,24 @@
 
 Java wrapper for working with the API [random.org](https://random.org)
 
+### Add to MAVEN
+https://jitpack.io/#megoRU/random.org-wrapper
+
+```
+<repositories>
+ <repository>
+	<id>jitpack.io</id>
+	<url>https://jitpack.io</url>
+ </repository>
+</repositories>
+
+<dependency>
+	<groupId>com.github.megoRU</groupId>
+	<artifactId>random.org-wrapper</artifactId>
+	<version>2.0</version>
+</dependency>
+
+```
 ### Example
 
 ````
