@@ -1,15 +1,19 @@
 package random.org.randomwrapper;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import random.org.Random;
-import random.org.RandomRequest;
+import random.org.RandomPOJORandom;
+import random.org.RandomResult;
+import random.org.request.RandomRequest;
 
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
 
-public class RandomWrapper {
+public final class RandomWrapper {
 
     private final String URL = "https://api.random.org/json-rpc/4/invoke";
     private final String API_KEY;
@@ -29,7 +33,7 @@ public class RandomWrapper {
     }
 
     public Random sendData() {
-        Random randomPOJO = null;
+        Random randomPOJO = new Random();
         try {
             RandomRequest randomRequest = new RandomRequest(n, min, max, API_KEY);
 
@@ -41,9 +45,35 @@ public class RandomWrapper {
                     .build();
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (debugging) System.out.println(response.body());
+            String body = response.body();
 
-            randomPOJO = new ObjectMapper().readValue(response.body(), Random.class);
+            if (debugging) System.out.println(body);
+
+            JSONObject obj = new JSONObject(body);
+
+            String[] split = obj
+                    .getJSONObject("result").getJSONObject("random").getJSONArray("data")
+                    .toString()
+                    .replaceAll("\\[", "")
+                    .replaceAll("]", "")
+                    .split(",");
+
+            randomPOJO.setJsonrpc(obj.getString("jsonrpc"));
+            randomPOJO.setResult(
+                    new RandomResult(
+                            new RandomPOJORandom(
+                                    new ArrayList<>(Arrays.asList(split)),
+                                    obj.getJSONObject("result").getJSONObject("random").getString("completionTime")
+                            ),
+
+                            obj.getJSONObject("result").getInt("bitsUsed"),
+                            obj.getJSONObject("result").getInt("bitsLeft"),
+                            obj.getJSONObject("result").getInt("requestsLeft"),
+                            obj.getJSONObject("result").getInt("advisoryDelay")
+
+                    ));
+            randomPOJO.setId(obj.getInt("id"));
+
         } catch (Exception e) {
             e.printStackTrace();
         }

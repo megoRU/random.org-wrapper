@@ -1,4 +1,6 @@
-package random.org;
+package random.org.request;
+
+import random.org.RandomList;
 
 public class RandomRequest {
 

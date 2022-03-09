@@ -5,17 +5,17 @@ import java.util.List;
 
 public class RandomPOJORandom {
 
-    private List<RandomData> data = new ArrayList<>();
+    private List<String> data = new ArrayList<>();
     private String completionTime;
 
-    protected RandomPOJORandom() {}
+    public RandomPOJORandom() {}
 
-    protected RandomPOJORandom(List<RandomData> data, String completionTime) {
+    public RandomPOJORandom(List<String> data, String completionTime) {
         this.data = data;
         this.completionTime = completionTime;
     }
 
-    protected RandomPOJORandom(String completionTime) {
+    public RandomPOJORandom(String completionTime) {
         this.completionTime = completionTime;
     }
 
@@ -23,7 +23,7 @@ public class RandomPOJORandom {
         return completionTime;
     }
 
-    public List<RandomData> getData() {
+    public List<String> getData() {
         return data;
     }
 }

@@ -8,7 +8,7 @@ public class RandomList {
     private final int max;
     private final boolean replacement = false;
 
-    protected RandomList(int n, int min, int max, String apiKey) {
+    public RandomList(int n, int min, int max, String apiKey) {
         this.n = n;
         this.min = min;
         this.max = max;

@@ -30,14 +30,7 @@ public class RandomWrapperTest {
 
     @Test
     public void isNumberInDiapason() {
-        Integer number = Integer.parseInt(random.getResult()
-                .getRandom()
-                .getData()
-                .get(0)
-                .getList().toString()
-                .replaceAll("\\[", "")
-                .replaceAll("]", ""));
-
+        Integer number = Integer.parseInt(random.getResult().getRandom().getData().get(0));
         assertTrue(numbers.contains(number));
     }
 }
