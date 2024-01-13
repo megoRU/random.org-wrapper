@@ -1,8 +1,11 @@
 package random.org;
 
+import lombok.Getter;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 public class RandomPOJORandom {
 
     private List<String> data = new ArrayList<>();
@@ -19,11 +22,4 @@ public class RandomPOJORandom {
         this.completionTime = completionTime;
     }
 
-    public String getCompletionTime() {
-        return completionTime;
-    }
-
-    public List<String> getData() {
-        return data;
-    }
 }

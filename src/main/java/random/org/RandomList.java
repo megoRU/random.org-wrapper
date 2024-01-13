@@ -6,9 +6,9 @@ public class RandomList {
     private final int n;
     private final int min;
     private final int max;
-    private final boolean replacement = false;
+    private boolean replacement; // false without same numbers
 
-    public RandomList(int n, int min, int max, String apiKey) {
+    public RandomList(int n, int min, int max, boolean replacement, String apiKey) {
         this.n = n;
         this.min = min;
         this.max = max;

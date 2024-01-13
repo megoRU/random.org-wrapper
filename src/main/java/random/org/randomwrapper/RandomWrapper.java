@@ -1,21 +1,22 @@
 package random.org.randomwrapper;
 
+import okhttp3.*;
 import org.json.JSONObject;
 import random.org.Random;
 import random.org.RandomPOJORandom;
 import random.org.RandomResult;
 import random.org.request.RandomRequest;
 
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Objects;
 
 public final class RandomWrapper {
 
-    private final String URL = "https://api.random.org/json-rpc/4/invoke";
+    private static final String URL = "https://api.random.org/json-rpc/4/invoke";
+    private static final OkHttpClient CLIENT = new OkHttpClient();
+    private static final MediaType MEDIA_TYPE_JSON = MediaType.parse("application/json; charset=utf-8");
+
     private final String API_KEY;
     private final int n;
     private final int min;
@@ -35,47 +36,50 @@ public final class RandomWrapper {
     public Random sendData() {
         Random randomPOJO = new Random();
         try {
-            RandomRequest randomRequest = new RandomRequest(n, min, max, API_KEY);
+            RandomRequest randomRequest = new RandomRequest(n, min, max, replacement, API_KEY);
+            Request.Builder requestBuilder = new Request.Builder()
+                    .url(URL)
+                    .post(RequestBody.create(randomRequest.toString(), MEDIA_TYPE_JSON))
+                    .addHeader("Content-Type", "application/json");
 
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(URL))
-                    .POST(HttpRequest.BodyPublishers.ofString(randomRequest.toString()))
-                    .header("Content-Type", "application/json")
-                    .build();
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            Request request = requestBuilder.build();
 
-            String body = response.body();
+            try (Response response = CLIENT.newCall(request).execute()) {
+                if (response.isSuccessful()) {
+                    String responseBody = Objects.requireNonNull(response.body()).string();
+                    if (debugging) System.out.println(responseBody);
+                    if (!response.isSuccessful()) {
+                        return randomPOJO;
+                    } else {
+                        JSONObject obj = new JSONObject(responseBody);
 
-            if (debugging) System.out.println(body);
+                        String[] split = obj
+                                .getJSONObject("result").getJSONObject("random").getJSONArray("data")
+                                .toString()
+                                .replaceAll("\\[", "")
+                                .replaceAll("]", "")
+                                .split(",");
 
-            JSONObject obj = new JSONObject(body);
+                        randomPOJO.setJsonrpc(obj.getString("jsonrpc"));
+                        randomPOJO.setResult(
+                                new RandomResult(
+                                        new RandomPOJORandom(
+                                                new ArrayList<>(Arrays.asList(split)),
+                                                obj.getJSONObject("result").getJSONObject("random").getString("completionTime")
+                                        ),
 
-            String[] split = obj
-                    .getJSONObject("result").getJSONObject("random").getJSONArray("data")
-                    .toString()
-                    .replaceAll("\\[", "")
-                    .replaceAll("]", "")
-                    .split(",");
+                                        obj.getJSONObject("result").getInt("bitsUsed"),
+                                        obj.getJSONObject("result").getInt("bitsLeft"),
+                                        obj.getJSONObject("result").getInt("requestsLeft"),
+                                        obj.getJSONObject("result").getInt("advisoryDelay")
 
-            randomPOJO.setJsonrpc(obj.getString("jsonrpc"));
-            randomPOJO.setResult(
-                    new RandomResult(
-                            new RandomPOJORandom(
-                                    new ArrayList<>(Arrays.asList(split)),
-                                    obj.getJSONObject("result").getJSONObject("random").getString("completionTime")
-                            ),
-
-                            obj.getJSONObject("result").getInt("bitsUsed"),
-                            obj.getJSONObject("result").getInt("bitsLeft"),
-                            obj.getJSONObject("result").getInt("requestsLeft"),
-                            obj.getJSONObject("result").getInt("advisoryDelay")
-
-                    ));
-            randomPOJO.setId(obj.getInt("id"));
-
+                                ));
+                        randomPOJO.setId(obj.getInt("id"));
+                    }
+                }
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
         return randomPOJO;
     }
