@@ -5,7 +5,7 @@ Java wrapper for working with the API [random.org](https://random.org)
 ### Add to MAVEN
 https://jitpack.io/#megoRU/random.org-wrapper
 
-```
+```xml
 <repositories>
  <repository>
 	<id>jitpack.io</id>
@@ -18,11 +18,11 @@ https://jitpack.io/#megoRU/random.org-wrapper
 	<artifactId>random.org-wrapper</artifactId>
 	<version>2.0</version>
 </dependency>
-
 ```
+
 ### Example
 
-````
+```java
 RandomWrapper randomWrapper = new RandomWrapper(
 "****-****-4fdf-8146-*********", //API_KEY
 1, // n
@@ -32,6 +32,6 @@ false, // replacement
 false); // debugging
 
 Random random = randomWrapper.sendData();
-System.out.println(random.getResult().getRandom().getData().get(0).getList());
+System.out.println(random.getResult().getRandom().getData().get(0).getList()); //Output: [2]
+```
 
-Output: [2]
