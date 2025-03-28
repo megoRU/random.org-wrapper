@@ -32,6 +32,6 @@ false, // replacement
 false); // debugging
 
 Random random = randomWrapper.sendData();
-System.out.println(random.getResult().getRandom().getData().get(0).getList()); //Output: [2]
+System.out.println(random.getResult().getRandom().getData().get(0)); //Output: [2]
 ```
 
